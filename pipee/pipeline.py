@@ -9,7 +9,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from pipee.common import StatusCode
 from pipee.dao import PipelineDAO
 from pipee.models import PipelineEntry as Ppl
-from pipee.utils import is_kwargs
+from pipee.utils import is_kwargs, stringify
+
+import traceback
 
 Base = declarative_base()
 
@@ -46,7 +48,7 @@ class ContextRegistry(BaseModel):
         Dump the context as json string
         This is for persistence
         """
-        return json.dumps(self.dict().get("ctx_registry"))
+        return json.dumps(self.dict())
 
 
 class ContextProcessor:
@@ -68,7 +70,15 @@ class DefaultContextProcessor(ContextProcessor):
 
 class Task:
     """
-    Abstract task
+    Abstract task instances that are chained into a pipeline
+    The load() and proceed() methods of a task should be carefully designed 
+    such that one task's load() can always process the return value
+    of previous task.
+
+    We do not suggest using load() with **kwargs (if you don't know about *args and
+     **kwargs, just don't use them), because it makes program unpredictable and 
+     unmaintainable. If you are using **kwargs anyway, just use kw_retval() for keyword 
+     part of return value and add @enable_kwargs to the load method of successor task
     """
 
     def __init__(self, *args, **kwargs):
@@ -131,8 +141,18 @@ class TaskRegistry:
 
 
 class Pipeline:
+    """
+    Logical pipeline unit. It's made up of a chain of tasks and 
+    corresponding contexts
+    """
 
-    def __init__(self, key, modifier):
+    def __init__(self, key, modifier, rollback_for=Exception, stringifier=stringify, result_parser=lambda x: x):
+        """
+        :param key: Globally unique key of pipeline. It's suggested that key is bound to 
+            existing resources for further query
+        :param modifier: Who does the modifier belong to
+        :param rollback_for: rollback for certain type of Exception
+        """
         self.context: ContextRegistry = ContextRegistry()
         self.tasks: TaskRegistry = TaskRegistry()
         self.message = ''
@@ -142,6 +162,9 @@ class Pipeline:
         self.modifier = modifier
         self.initialized = False
         self.result = None
+        self.stringifier = stringifier
+        self.result_parser=result_parser
+        self.rollback_for = rollback_for
 
     def init(self):
         """
@@ -149,6 +172,31 @@ class Pipeline:
         are registered
         """
         raise NotImplementedError
+
+    def update(self):
+        """
+        Flush current pipeline state to database
+        """
+        
+        PipelineDAO.update_pipeline(self.key, {
+           "status": self.status,
+           "message": str(self.message),
+           "stage": self.stage,
+           "context": self.context.dump(),
+           "result": self.stringifier(self.result),
+           "modified_time": datetime.now()
+        })
+
+    def load(self):
+        """
+        Load a pipeline from database
+        """
+        pipeline_entry = PipelineDAO.get_pipeline_by_key(self.key)
+        self.status = pipeline_entry.status
+        self.stage = pipeline_entry.stage
+        self.context = ContextRegistry(**json.loads(pipeline_entry.context))
+
+    
 
     def register_context(self, task_name, *args, **kwargs):
         """
@@ -170,8 +218,10 @@ class Pipeline:
 
         self.stage = stage_name
         self.context.register_context(stage_name, *args, **kwargs)
+        print("Inserting")
         PipelineDAO.insert_pipeline(Ppl(
             id=None, key=self.key, stage=self.stage,
+            status=self.status,
             message=self.message,
             context=self.context.dump(),
             created_time=datetime.now(),
@@ -201,15 +251,26 @@ class Pipeline:
                         print(res)
                         self.context.register_context(next_stage, *res[:-1], **res[-1])
                     self.context.register_context(next_stage, *res)
+                    
                 else:
                     self.context.register_context(next_stage, res)
+                
             else:
                 # Pipeline finished
                 self.stage = None
                 self.status = StatusCode.FINISHED
                 self.result = res
+            
+            # TODO update pipeline in database
+            self.update()
+            
             return res
         except Exception as e:
             # TODO implement rollback_for
-            self.message = str(e)
-            self.status = StatusCode.ERROR
+            
+            if isinstance(e, self.rollback_for):
+                task.rollback()
+            else:
+                self.message = str(traceback.format_exception(type(e), e, e.__traceback__))
+                self.status = StatusCode.ERROR
+            self.update()

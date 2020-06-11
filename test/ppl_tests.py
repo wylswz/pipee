@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv("test/test.env")
 
 from pipee.pipeline import Task, Pipeline
 from pipee.utils import kw_retval, enable_kwargs
@@ -95,8 +97,11 @@ class TestPipelineExecution(PipelineTestCase):
         pipeline.proceed()
         self.assertEqual(1,pipeline.result)
 
+        pipeline = Pipeline("test_ppl", "test_user")
+        pipeline.load()
+        print(pipeline.context)
         
 
-
+        
 if __name__ == '__main__':
     unittest.main()

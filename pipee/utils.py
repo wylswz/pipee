@@ -1,3 +1,7 @@
+from pydantic import BaseModel
+import json
+
+
 _rnd_token = '836e22ae-abaf-11ea-90bd-106530269587'
 
 
@@ -49,3 +53,14 @@ def enable_kwargs(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+def stringify(result):
+    """
+    Convert a result to string
+    Built-in implementation only support BaseModel. 
+    Other types are converted using str() directly
+    """
+    if isinstance(result, BaseModel):
+        return json.dumps(result.dict())
+    else:
+        return str(result)

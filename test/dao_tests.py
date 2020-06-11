@@ -66,11 +66,17 @@ class TestPipelineDAO(DaoTestCase):
         PipelineDAO.delete_pipeline_by_key('key1')
         PipelineDAO.delete_pipeline_by_key('key1')
         self.assertIsNone(PipelineDAO.get_pipeline_by_key('key1'))
+        
         PipelineDAO.insert_pipeline(Ppl(**self.ppl1))
         PipelineDAO.insert_pipeline(Ppl(**self.ppl2))
         id = PipelineDAO.get_pipeline_by_key('key2').id
         PipelineDAO.delete_pipeline(id)
         self.assertIsNone(PipelineDAO.get_pipeline(id))
+        PipelineDAO.delete_pipeline_by_key("key1")
+        PipelineDAO.insert_pipeline(Ppl(**self.ppl1))
+        PipelineDAO.update_pipeline("key1", {"status": "UNKNOWN"})
+        self.assertEqual("UNKNOWN", PipelineDAO.get_pipeline_by_key("key1").status)
+
 
 
 

@@ -17,4 +17,9 @@ message Config {
     */
     optional string PIPELINE_DB_ADDRESS = 1 [default="sqlite://:memory:"];
 
+    /*
+    Whether persistence should be enabled. If false, pipelines are not dump to database
+    */
+    optional string PERSISTENCE_ENABLED = 2 [default=true];
+
 }

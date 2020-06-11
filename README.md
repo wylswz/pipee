@@ -15,10 +15,8 @@ Aimed to design a pipelined task execution pattern with following features
 still under development
 
 
-
-
 ## Configuration
-
+See configuration/ folder for details
 
 ## Pylint 
 pylint <module_or_package> -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > report.txt
