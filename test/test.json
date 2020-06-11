@@ -1,0 +1,48 @@
+{
+    "ctx_registry": {
+        "task_a": [
+            [
+                {
+                    "var_a1": 3,
+                    "var_a2": null,
+                    "var_a3": null
+                }
+            ],
+            {}
+        ],
+        "task_b": [
+            [
+                {
+                    "var_b1": {
+                        "var_a1": 3,
+                        "var_a2": null,
+                        "var_a3": null
+                    }
+                }
+            ],
+            {}
+        ],
+        "task_c": [
+            [
+                "c",
+                "d",
+                "e",
+                "f",
+                {
+                    "g": {
+                        "var_c1": [
+                            {
+                                "var_b1": {
+                                    "var_a1": 3,
+                                    "var_a2": null,
+                                    "var_a3": null
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            {}
+        ]
+    }
+}

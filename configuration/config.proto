@@ -1,0 +1,20 @@
+
+/*
+This is just for configuration guideline. Real config values should be set with environment
+variables
+*/
+message Config {
+    
+    /*
+    Connection string for database. This library uses sqlalchemy as db connector
+    
+    MySQL: mysql://username:password@localhost:3306/dbname
+    Oracle: oracle://username:password@127.0.0.1:1521/dbname
+    SQLite: sqlite:////absolute/path/to/foo.db
+    SQLite in-memory: sqlite://
+
+    For more details please refer to https://docs.sqlalchemy.org/en/13/core/engines.html
+    */
+    optional string PIPELINE_DB_ADDRESS = 1 [default="sqlite://:memory:"];
+
+}

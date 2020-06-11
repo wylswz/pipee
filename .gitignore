@@ -1,0 +1,8 @@
+**/__pycache__
+
+.coverage
+coverage.xml
+.scannerwork*
+
+report
+sonar-scanner*
