@@ -3,7 +3,7 @@ load_dotenv("test/test.env")
 
 import unittest
 import os
-from pipee.models import Pipeline as Ppl
+from pipee.models import PipelineEntry as Ppl
 from pipee.dao import PipelineDAO
 from pipee.system.connections import Connection
 from sqlalchemy.engine import Engine

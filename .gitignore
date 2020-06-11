@@ -6,3 +6,7 @@ coverage.xml
 
 report
 sonar-scanner*
+
+build/
+dist/
+pipee.egg-info/

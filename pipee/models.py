@@ -15,7 +15,7 @@ class OpLog(Base):
     log_type = Column(String(20))
 
 
-class Pipeline(Base):
+class PipelineEntry(Base):
     __tablename__ = 'pipee'
 
     id = Column('id', Integer, primary_key=True, autoincrement=True)

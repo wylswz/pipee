@@ -3,6 +3,7 @@ import os
 
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine import Engine
+from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.engine.url import make_url
 
 from pipee.models import Base

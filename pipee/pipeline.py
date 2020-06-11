@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from pipee.common import StatusCode
 from pipee.dao import PipelineDAO
-from pipee.models import Pipeline as Ppl
+from pipee.models import PipelineEntry as Ppl
 from pipee.utils import is_kwargs
 
 Base = declarative_base()
